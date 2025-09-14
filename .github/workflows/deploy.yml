@@ -42,14 +42,15 @@ jobs:
 
             # Bangun (build) Docker image baru dengan tag 'my-fastapi-app'
             # Titik (.) berarti Dockerfile ada di direktori saat ini
-            docker build -t my-fastapi-app .
+            sudo docker build -t my-fastapi-app .
 
             # Hentikan container lama jika ada (abaikan error jika tidak ada)
-            docker stop web-app || true
+            sudo docker stop web-app || true
 
             # Hapus container lama jika ada (abaikan error jika tidak ada)
-            docker rm web-app || true
+            sudo docker rm web-app || true
 
+            sudo docker run -d --name web-app -p 8000:8000 my-fastapi-app
             # Jalankan container baru dari image yang baru dibuat
             # -d: detached mode (jalan di background)
             # --name: beri
