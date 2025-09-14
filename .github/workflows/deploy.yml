@@ -15,29 +15,30 @@ jobs:
         uses: actions/checkout@v4
 
       # Langkah 2: Login ke VPS via SSH dan jalankan perintah deploy
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.VPS_HOST }}       # IP VPS dari secrets
-          username: ${{ secrets.VPS_USER }}   # Username dari secrets
-          key: ${{ secrets.VPS_SSH_KEY }}     # Kunci SSH privat dari secrets
-          script: |
-            # Masuk ke direktori aplikasi di VPS
-            cd ~/app
+          - name: Deploy to VPS
+            uses: appleboy/ssh-action@master
+            with:
+              host: ${{ secrets.VPS_HOST }}
+              username: ${{ secrets.VPS_USER }}
+              key: ${{ secrets.VPS_SSH_KEY }}
+              script: |
+                # Masuk ke direktori aplikasi
+                cd ~/app
 
-            # Jika repository sudah ada, tarik perubahan terbaru. Jika belum, clone.
-            if [ -d .git ]; then
-              git pull origin main
-            else
-              git clone git@github.com:YourUsername/YourRepo.git .
-            fi
+                # Tarik kode terbaru
+                git pull origin main
 
-            # Install/update dependensi Python
-            pip3 install -r requirements.txt
+                # Bangun (build) Docker image baru dengan tag 'my-fastapi-app'
+                docker build -t my-fastapi-app .
 
-            # Matikan proses uvicorn yang sedang berjalan (jika ada)
-            # Cara sederhana, untuk produksi disarankan pakai systemd
-            pkill uvicorn || true
+                # Hentikan container lama jika ada (abaikan error jika tidak ada)
+                docker stop web-app || true
 
-            # Jalankan aplikasi di background
-            nohup uvicorn main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
+                # Hapus container lama jika ada (abaikan error jika tidak ada)
+                docker rm web-app || true
+
+                # Jalankan container baru dari image yang baru dibuat
+                # -d: detached mode (jalan di background)
+                # --name: beri nama container agar mudah dikelola
+                # -p 8000:8000: mapping port 8000 di VPS ke port 8000 di container
+                docker run -d --name web-app -p 8000:8000 my-fastapi-app
