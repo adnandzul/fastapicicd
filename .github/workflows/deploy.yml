@@ -35,7 +35,7 @@ jobs:
           # Skrip yang akan dijalankan di dalam VPS
           script: |
             # Masuk ke direktori aplikasi
-            cd /home/deployer/app
+            cd /root/app
 
             # Tarik kode terbaru dari branch main
             git pull origin main
