@@ -34,7 +34,7 @@ jobs:
           
           # Skrip yang akan dijalankan di dalam VPS
           script: |
-            # Masuk ke direktori aplikasi
+            # Masuk ke direktori aplikasi yangbenar
             cd /root/app
 
             # Tarik kode terbaru dari branch main
