@@ -1,44 +1,55 @@
-name: Deploy to VPS 🚀
+# Nama workflow yang akan muncul di tab Actions GitHub
+name: Deploy to VPS with Docker 🐳
 
+# Pemicu (trigger) workflow
 on:
+  # Jalankan workflow setiap kali ada 'push' ke branch 'main'
   push:
     branches:
-      - main # Jalankan workflow hanya jika ada push ke branch 'main'
+      - main
 
+# Daftar pekerjaan (jobs) yang akan dijalankan
 jobs:
+  # Kita definisikan satu job bernama 'deploy'
   deploy:
+    # Job ini akan berjalan di environment Ubuntu terbaru yang disediakan GitHub
     runs-on: ubuntu-latest
 
+    # Langkah-langkah (steps) yang akan dieksekusi dalam job 'deploy'
     steps:
-      # Langkah 1: Mengambil kode dari repository
+      # Langkah 1: Checkout kode
+      # Step ini mengunduh kodemu ke dalam runner GitHub Actions
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Langkah 2: Login ke VPS via SSH dan jalankan perintah deploy
-          - name: Deploy to VPS
-            uses: appleboy/ssh-action@master
-            with:
-              host: ${{ secrets.VPS_HOST }}
-              username: ${{ secrets.VPS_USER }}
-              key: ${{ secrets.VPS_SSH_KEY }}
-              script: |
-                # Masuk ke direktori aplikasi
-                cd ~/app
+      # Langkah 2: Deploy ke VPS menggunakan SSH
+      # Step ini menggunakan Action 'ssh-action' untuk login dan menjalankan perintah di VPS
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          # Ambil data sensitif dari GitHub Secrets
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          
+          # Skrip yang akan dijalankan di dalam VPS
+          script: |
+            # Masuk ke direktori aplikasi
+            cd ~/app
 
-                # Tarik kode terbaru
-                git pull origin main
+            # Tarik kode terbaru dari branch main
+            git pull origin main
 
-                # Bangun (build) Docker image baru dengan tag 'my-fastapi-app'
-                docker build -t my-fastapi-app .
+            # Bangun (build) Docker image baru dengan tag 'my-fastapi-app'
+            # Titik (.) berarti Dockerfile ada di direktori saat ini
+            docker build -t my-fastapi-app .
 
-                # Hentikan container lama jika ada (abaikan error jika tidak ada)
-                docker stop web-app || true
+            # Hentikan container lama jika ada (abaikan error jika tidak ada)
+            docker stop web-app || true
 
-                # Hapus container lama jika ada (abaikan error jika tidak ada)
-                docker rm web-app || true
+            # Hapus container lama jika ada (abaikan error jika tidak ada)
+            docker rm web-app || true
 
-                # Jalankan container baru dari image yang baru dibuat
-                # -d: detached mode (jalan di background)
-                # --name: beri nama container agar mudah dikelola
-                # -p 8000:8000: mapping port 8000 di VPS ke port 8000 di container
-                docker run -d --name web-app -p 8000:8000 my-fastapi-app
+            # Jalankan container baru dari image yang baru dibuat
+            # -d: detached mode (jalan di background)
+            # --name: beri
