@@ -1,5 +1,5 @@
 # 1. Base Image: Mulai dari image resmi Python yang ringan
-FROM python:3.9-slim
+FROM python:3.11-slim
 
 # 2. Set Direktori Kerja di dalam container
 WORKDIR /code
