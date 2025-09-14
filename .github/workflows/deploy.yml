@@ -35,7 +35,7 @@ jobs:
           # Skrip yang akan dijalankan di dalam VPS
           script: |
             # Masuk ke direktori aplikasi yangbenar
-            cd /root/app
+            cd /root/app/fastapicicd
 
             # Tarik kode terbaru dari branch main
             git pull origin main
